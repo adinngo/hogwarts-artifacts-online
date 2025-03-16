@@ -110,4 +110,23 @@ class ArtifactControllerTest {
                 .andExpect(jsonPath("$.message").value("Could not found artifact with Id 1250808601744904196"))
                 .andExpect(jsonPath("$.data").isEmpty());
     }
+
+    @Test
+    void testFindAllArtifactSuccess() throws Exception {
+        //given
+        given(artifactService.findAll()).willReturn(this.artifactList);
+        //when and then
+        mockMvc.perform(get("/api/v1/artifacts").accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.flag").value(true))
+                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+                .andExpect(jsonPath("$.message").value("Find All Success"))
+                .andExpect(jsonPath("$.data.size()").value(this.artifactList.size()))
+                .andExpect(jsonPath("$.data[0].id").value("1250808601744904191"))
+                .andExpect(jsonPath("$.data[0].name").value("Deluminator"))
+                .andExpect(jsonPath("$.data[1].id").value("1250808601744904192"))
+                .andExpect(jsonPath("$.data[1].name").value("Invisibility Cloak"));
+
+
+
+    }
 }
