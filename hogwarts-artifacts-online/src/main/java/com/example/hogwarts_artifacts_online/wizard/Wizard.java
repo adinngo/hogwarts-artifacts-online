@@ -48,4 +48,8 @@ public class Wizard {
         artifact.setOwner(this);
         this.artifactList.add(artifact);
     }
+
+    public Integer getNumberOfArtifacts() {
+        return this.artifactList.size();
+    }
 }
