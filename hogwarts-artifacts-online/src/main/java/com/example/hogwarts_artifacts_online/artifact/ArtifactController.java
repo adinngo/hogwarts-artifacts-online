@@ -5,6 +5,7 @@ import com.example.hogwarts_artifacts_online.artifact.converter.ArtifactToArtifa
 import com.example.hogwarts_artifacts_online.artifact.dto.ArtifactDto;
 import com.example.hogwarts_artifacts_online.system.Result;
 import com.example.hogwarts_artifacts_online.system.StatusCode;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -48,11 +49,13 @@ public class ArtifactController {
     }
 
     @PostMapping
-    public Result addArtifact(@RequestBody ArtifactDto artifactDto) {
+    public Result addArtifact(@Valid @RequestBody ArtifactDto artifactDto) {
         Artifact newArtifact = artifactDtoToArtifactConverter.convert(artifactDto);
         Artifact savedArtifact = this.artifactService.save(newArtifact);
         ArtifactDto savedArtifactDto = artifactToArtifactDtoConverter.convert(savedArtifact);
         return new Result(true, StatusCode.SUCCESS, "Add Success", savedArtifactDto);
     }
+
+
 
 }
