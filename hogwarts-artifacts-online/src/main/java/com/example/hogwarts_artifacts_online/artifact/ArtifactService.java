@@ -1,5 +1,6 @@
 package com.example.hogwarts_artifacts_online.artifact;
 
+import com.example.hogwarts_artifacts_online.artifact.utils.IdWorker;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -11,8 +12,11 @@ public class ArtifactService {
 
     private final ArtifactRepository artifactRepository;
 
-    public ArtifactService(ArtifactRepository artifactRepository) {
+    private final IdWorker idWorker;
+
+    public ArtifactService(ArtifactRepository artifactRepository, IdWorker idWorker) {
         this.artifactRepository = artifactRepository;
+        this.idWorker = idWorker;
     }
 
     public Artifact findById(String artifactId) {
@@ -23,5 +27,10 @@ public class ArtifactService {
 
     public List<Artifact> findAll() {
         return artifactRepository.findAll();
+    }
+
+    public Artifact save(Artifact newArtifact) {
+        newArtifact.setId(idWorker.nextId() + "");
+        return this.artifactRepository.save(newArtifact);
     }
 }

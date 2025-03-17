@@ -1,10 +1,13 @@
 package com.example.hogwarts_artifacts_online.artifact;
 
+import com.example.hogwarts_artifacts_online.artifact.dto.ArtifactDto;
 import com.example.hogwarts_artifacts_online.system.StatusCode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +32,9 @@ class ArtifactControllerTest {
 
     @Autowired
     MockMvc mockMvc;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @MockitoBean
     ArtifactService artifactService;
@@ -125,8 +131,38 @@ class ArtifactControllerTest {
                 .andExpect(jsonPath("$.data[0].name").value("Deluminator"))
                 .andExpect(jsonPath("$.data[1].id").value("1250808601744904192"))
                 .andExpect(jsonPath("$.data[1].name").value("Invisibility Cloak"));
+    }
 
+    @Test
+    void testAddArtifactSuccess() throws Exception {
+        ArtifactDto artifactDto = new ArtifactDto(null,
+                "Remembrall",
+                "A Remembrall was a magical large marble-sized glass ball that contained smoke which turned red when its owner or user had forgotten something. It turned clear once whatever was forgotten was remembered.",
+                "ImageUrl",
+                null);
+        //để đưa vào payload dạng json do client post request
+        String json = this.objectMapper.writeValueAsString(artifactDto);
 
+        //cai nay la cai artifact sau khi save trong database và tra ve lại cho client dạng Result
+        Artifact savedArtifact = new Artifact();
+        savedArtifact.setId("1250808601744904197");
+        savedArtifact.setName("Remembrall");
+        savedArtifact.setDescription("A Remembrall was a magical large marble-sized glass ball that contained smoke which turned red when its owner or user had forgotten something. It turned clear once whatever was forgotten was remembered.");
+        savedArtifact.setImageUrl("ImageUrl");
 
+        given(artifactService.save(Mockito.any(Artifact.class))).willReturn(savedArtifact);
+
+        //when and then
+        mockMvc.perform(post("/api/v1/artifacts")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(jsonPath("$.flag").value(true))
+                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+                .andExpect(jsonPath("$.message").value("Add Success"))
+                .andExpect(jsonPath("$.data.id").isNotEmpty())
+                .andExpect(jsonPath("$.data.name").value(savedArtifact.getName()))
+                .andExpect(jsonPath("$.data.description").value(savedArtifact.getDescription()))
+                .andExpect(jsonPath("$.data.ImageUrl").value(savedArtifact.getImageUrl()));
     }
 }

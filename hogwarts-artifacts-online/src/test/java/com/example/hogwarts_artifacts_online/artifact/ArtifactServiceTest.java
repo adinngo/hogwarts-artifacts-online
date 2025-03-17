@@ -1,5 +1,6 @@
 package com.example.hogwarts_artifacts_online.artifact;
 
+import com.example.hogwarts_artifacts_online.artifact.utils.IdWorker;
 import com.example.hogwarts_artifacts_online.wizard.Wizard;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +27,9 @@ class ArtifactServiceTest {
 
     @Mock
     ArtifactRepository artifactRepository;
+
+    @Mock
+    IdWorker idWorker;
 
     @InjectMocks
     ArtifactService artifactService;
@@ -132,6 +136,28 @@ class ArtifactServiceTest {
         //then
         assertThat(actualArtifactList.size()).isEqualTo(this.artifactList.size());
         verify(artifactRepository, times(1)).findAll();
+
+    }
+
+    @Test
+    void testSaveSuccess() {
+        //given
+        Artifact newArtifact = new Artifact();
+        newArtifact.setName("Artifact 3");
+        newArtifact.setDescription("Description");
+        newArtifact.setImageUrl("imageUrl");
+
+        given(idWorker.nextId()).willReturn(123456L);
+        given(artifactRepository.save(newArtifact)).willReturn(newArtifact);
+
+        //when
+        Artifact savedArtifact = artifactService.save(newArtifact);
+        //then
+        assertThat(savedArtifact.getId()).isEqualTo("123456");
+        assertThat(savedArtifact.getName()).isEqualTo(newArtifact.getName());
+        assertThat(savedArtifact.getDescription()).isEqualTo(newArtifact.getDescription());
+        assertThat(savedArtifact.getImageUrl()).isEqualTo(newArtifact.getImageUrl());
+        verify(artifactRepository, times(1)).save(newArtifact);
 
     }
 }
