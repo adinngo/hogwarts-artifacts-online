@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -44,5 +45,11 @@ public class ArtifactService {
                         })
                 .orElseThrow(() -> new ArtifactNotFoundException(artifactId));
 
+    }
+
+    public void delete(String artifactId) {
+        Artifact artifact = this.artifactRepository.findById(artifactId).orElseThrow(() ->
+                new ArtifactNotFoundException(artifactId));
+        this.artifactRepository.deleteById(artifactId);
     }
 }

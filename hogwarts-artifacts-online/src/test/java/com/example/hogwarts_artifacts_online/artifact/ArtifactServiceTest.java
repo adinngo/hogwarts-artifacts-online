@@ -20,8 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ArtifactServiceTest {
@@ -207,5 +206,31 @@ class ArtifactServiceTest {
         //then
         verify(artifactRepository, times(1)).findById( "1250808601744904191");
 
+    }
+
+    @Test
+    void testDeleteSuccess() {
+        Artifact artifact = new Artifact();
+        artifact.setName("Deluminator-artifact");
+        artifact.setDescription("A new description");
+        artifact.setImageUrl("ImageUrl");
+
+        given(artifactRepository.findById("1250808601744904192")).willReturn(Optional.of(artifact));
+        doNothing().when(artifactRepository).deleteById("1250808601744904192");
+        //when
+        artifactService.delete("1250808601744904192");
+        //then
+        verify(artifactRepository, times(1)).deleteById("1250808601744904192");
+
+    }
+
+    @Test
+    void testDeleteErrorWithNonExistenceId() {
+
+        given(artifactRepository.findById("1250808601744904192")).willReturn(Optional.empty());
+
+        assertThrows(ArtifactNotFoundException.class, () -> artifactService.delete("1250808601744904192"));
+
+        verify(artifactRepository, times(1)).findById("1250808601744904192");
     }
 }
