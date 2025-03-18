@@ -8,7 +8,7 @@ import com.example.hogwarts_artifacts_online.system.StatusCode;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,6 +56,13 @@ public class ArtifactController {
         return new Result(true, StatusCode.SUCCESS, "Add Success", savedArtifactDto);
     }
 
-
+    @PutMapping("/{artifactId}")
+    public Result updateArtifact(@PathVariable String artifactId,
+                              @Valid @RequestBody ArtifactDto artifactDto){
+        var update = this.artifactDtoToArtifactConverter.convert(artifactDto);
+        var updatedArtifact = this.artifactService.update(artifactId, update);
+        var updatedArtifactDto = this.artifactToArtifactDtoConverter.convert(updatedArtifact);
+        return new Result(true, StatusCode.SUCCESS, "Update Success", updatedArtifactDto);
+    }
 
 }

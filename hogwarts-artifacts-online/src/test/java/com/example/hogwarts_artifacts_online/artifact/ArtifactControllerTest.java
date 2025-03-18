@@ -2,6 +2,7 @@ package com.example.hogwarts_artifacts_online.artifact;
 
 import com.example.hogwarts_artifacts_online.artifact.dto.ArtifactDto;
 import com.example.hogwarts_artifacts_online.system.StatusCode;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +20,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -164,5 +167,61 @@ class ArtifactControllerTest {
                 .andExpect(jsonPath("$.data.name").value(savedArtifact.getName()))
                 .andExpect(jsonPath("$.data.description").value(savedArtifact.getDescription()))
                 .andExpect(jsonPath("$.data.ImageUrl").value(savedArtifact.getImageUrl()));
+    }
+
+    @Test
+    void testUpdateArtifactSuccess() throws Exception {
+        //given
+        ArtifactDto artifactDto = new ArtifactDto(null,
+                "Deluminator-update",
+                "A Deluminator is a device invented by Albus Dumbledore that resembles a cigarette lighter. It is used to remove or absorb (as well as return) the light from any light source to provide cover to the user.-update",
+                "ImageUrl-update",
+                null);
+        //để đưa vào payload dạng json do client put request
+        String json = this.objectMapper.writeValueAsString(artifactDto);
+
+
+        Artifact updatedArtifact = new Artifact();
+        updatedArtifact.setId( "1250808601744904191");
+        updatedArtifact.setName("Deluminator-update");
+        updatedArtifact.setDescription("A Deluminator is a device invented by Albus Dumbledore that resembles a cigarette lighter. It is used to remove or absorb (as well as return) the light from any light source to provide cover to the user.-update");
+        updatedArtifact.setImageUrl("ImageUrl-update");
+
+        given(artifactService.update(eq("1250808601744904191"), Mockito.any(Artifact.class))).willReturn(updatedArtifact);
+
+        //Then
+        mockMvc.perform(put("/api/v1/artifacts/1250808601744904191")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(jsonPath("$.flag").value(true))
+                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+                .andExpect(jsonPath("$.message").value("Update Success"))
+                .andExpect(jsonPath("$.data.id").value("1250808601744904191"))
+                .andExpect(jsonPath("$.data.name").value(updatedArtifact.getName()))
+                .andExpect(jsonPath("$.data.description").value(updatedArtifact.getDescription()))
+                .andExpect(jsonPath("$.data.imageUrl").value(updatedArtifact.getImageUrl()));
+
+    }
+
+    @Test
+    void testUpdateArtifactErrorWithNonExistenceId() throws Exception {
+        //given
+        ArtifactDto artifactDto = new ArtifactDto(null,
+                "Deluminator-update",
+                "A Deluminator is a device invented by Albus Dumbledore that resembles a cigarette lighter. It is used to remove or absorb (as well as return) the light from any light source to provide cover to the user.-update",
+                "ImageUrl-update",
+                null);
+        //để đưa vào payload dạng json do client put request
+        String json = this.objectMapper.writeValueAsString(artifactDto);
+
+        given(artifactService.update(eq("1250808601744904191"), Mockito.any(Artifact.class)))
+                .willThrow(new ArtifactNotFoundException("1250808601744904191"));
+
+        //when and then
+        mockMvc.perform(put("/api/v1/artifacts/1250808601744904191").contentType(MediaType.APPLICATION_JSON).content(json))
+                .andExpect(jsonPath("$.flag").value(false))
+                .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
+                .andExpect(jsonPath("$.message").value("Could not found artifact with Id 1250808601744904191"))
+                .andExpect(jsonPath("$.data").isEmpty());
     }
 }
