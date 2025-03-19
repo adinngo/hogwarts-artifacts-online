@@ -2,7 +2,7 @@ package com.example.hogwarts_artifacts_online.system;
 
 import com.example.hogwarts_artifacts_online.artifact.Artifact;
 import com.example.hogwarts_artifacts_online.artifact.ArtifactRepository;
-import com.example.hogwarts_artifacts_online.wizard.WizadRepository;
+import com.example.hogwarts_artifacts_online.wizard.WizardRepository;
 import com.example.hogwarts_artifacts_online.wizard.Wizard;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -12,11 +12,11 @@ public class DBDataInitializer implements CommandLineRunner {
 
     ArtifactRepository artifactRepository;
 
-    WizadRepository wizadRepository;
+    WizardRepository wizardRepository;
 
-    public DBDataInitializer(ArtifactRepository artifactRepository, WizadRepository wizadRepository) {
+    public DBDataInitializer(ArtifactRepository artifactRepository, WizardRepository wizardRepository) {
         this.artifactRepository = artifactRepository;
-        this.wizadRepository = wizadRepository;
+        this.wizardRepository = wizardRepository;
     }
 
     @Override
@@ -59,25 +59,22 @@ public class DBDataInitializer implements CommandLineRunner {
         a6.setImageUrl("ImageUrl");
 
         Wizard w1 = new Wizard();
-        w1.setId("1");
         w1.setName("Albus Dumbledore");
         w1.addArtifact(a1);
         w1.addArtifact(a3);
 
         Wizard w2 = new Wizard();
-        w2.setId("2");
         w2.setName("Harry Potter");
         w2.addArtifact(a2);
         w2.addArtifact(a4);
 
         Wizard w3 = new Wizard();
-        w3.setId("3");
         w3.setName("Neville Longbottom");
         w3.addArtifact(a5);
 
-        wizadRepository.save(w1);
-        wizadRepository.save(w2);
-        wizadRepository.save(w3);
+        wizardRepository.save(w1);
+        wizardRepository.save(w2);
+        wizardRepository.save(w3);
 
         artifactRepository.save(a6);
     }

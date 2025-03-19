@@ -1,17 +1,15 @@
 package com.example.hogwarts_artifacts_online.wizard;
 
 import com.example.hogwarts_artifacts_online.artifact.Artifact;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
 @Entity
 public class Wizard {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String name;
 
@@ -20,11 +18,11 @@ public class Wizard {
 
     public Wizard(){}
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long  id) {
         this.id = id;
     }
 
