@@ -1,5 +1,6 @@
 package com.example.hogwarts_artifacts_online.wizard;
 
+import com.example.hogwarts_artifacts_online.system.exception.ObjectNotFoundException;
 import com.example.hogwarts_artifacts_online.wizard.dto.WizardDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +59,7 @@ class WizardServiceTest {
     void testFindByIdNotFound() {
         given(this.wizardRepository.findById(Mockito.anyLong())).willReturn(Optional.empty());
 
-        assertThrows(WizardNotFoundException.class, () -> this.wizardService.findById("1"));
+        assertThrows(ObjectNotFoundException.class, () -> this.wizardService.findById("1"));
 
         verify(wizardRepository, times(1)).findById(1L);
 
@@ -138,7 +139,7 @@ class WizardServiceTest {
         given(this.wizardRepository.findById(1L))
                 .willReturn(Optional.empty());
 
-        assertThrows(WizardNotFoundException.class, () -> this.wizardService.update("1", oldWizard));
+        assertThrows(ObjectNotFoundException.class, () -> this.wizardService.update("1", oldWizard));
         verify(this.wizardRepository, times(1)).findById(1L);
     }
 
@@ -165,7 +166,7 @@ class WizardServiceTest {
 
         given(this.wizardRepository.findById(1L)).willReturn(Optional.empty());
 
-        assertThrows(WizardNotFoundException.class, () -> this.wizardService.delete("1"));
+        assertThrows(ObjectNotFoundException.class, () -> this.wizardService.delete("1"));
         verify(this.wizardRepository, times(1)).findById(1L);;
     }
 }

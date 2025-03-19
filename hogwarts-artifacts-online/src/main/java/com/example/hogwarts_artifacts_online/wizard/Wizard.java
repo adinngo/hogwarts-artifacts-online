@@ -50,4 +50,9 @@ public class Wizard {
     public Integer getNumberOfArtifacts() {
         return this.artifactList.size();
     }
+
+    public void removeAllArtifacts() {
+        this.artifactList.stream().forEach(artifact -> artifact.setOwner(null));
+        this.artifactList = new ArrayList<>();
+    }
 }
