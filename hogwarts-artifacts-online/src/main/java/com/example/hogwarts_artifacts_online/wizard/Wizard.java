@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
 @Entity
 public class Wizard {
     @Id
@@ -54,5 +56,10 @@ public class Wizard {
     public void removeAllArtifacts() {
         this.artifactList.stream().forEach(artifact -> artifact.setOwner(null));
         this.artifactList = new ArrayList<>();
+    }
+
+    public void removeArtifact(Artifact artifactToBeAssigned) {
+        artifactToBeAssigned.setOwner(null);
+        this.artifactList.remove(artifactToBeAssigned);
     }
 }
