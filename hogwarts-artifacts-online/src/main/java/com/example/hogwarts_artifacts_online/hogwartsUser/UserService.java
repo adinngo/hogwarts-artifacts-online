@@ -1,17 +1,25 @@
 package com.example.hogwarts_artifacts_online.hogwartsUser;
 
 import com.example.hogwarts_artifacts_online.system.exception.ObjectNotFoundException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    public UserService(UserRepository userRepository,
+                       BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     public List<HogwartsUser> findAll() {
@@ -23,6 +31,7 @@ public class UserService {
     }
 
     public HogwartsUser save(HogwartsUser newUser) {
+        newUser.setPassword(this.bCryptPasswordEncoder.encode(newUser.getPassword()));
         return this.userRepository.save(newUser);
     }
 
@@ -40,4 +49,10 @@ public class UserService {
         this.userRepository.deleteById(userId);
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return this.userRepository.findByUsername(username)
+                .map(foundUser -> new MyUserPrincipal(foundUser))
+                .orElseThrow(() -> new UsernameNotFoundException("username " + username + " is not found"));
+    }
 }

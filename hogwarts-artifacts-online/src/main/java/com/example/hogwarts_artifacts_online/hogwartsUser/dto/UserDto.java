@@ -5,10 +5,10 @@ import org.springframework.stereotype.Component;
 
 
 public record UserDto(Long id,
-                      @NotEmpty(message = "name is required")
+                      @NotEmpty(message = "username is required.")
                       String username,
                       boolean enabled,
-                      @NotEmpty(message = "roles are required")
+                      @NotEmpty(message = "roles are required.")
                       String roles) {
 
 }

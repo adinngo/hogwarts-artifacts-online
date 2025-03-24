@@ -13,15 +13,15 @@ public class HogwartsUser {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @NotEmpty(message = "username is required")
+    @NotEmpty(message = "username is required.")
     private String username;
 
-    @NotEmpty(message = "password is required")
+    @NotEmpty(message = "password is required.")
     private String password;
 
     private boolean enabled;
 
-    @NotEmpty(message = "roles is required")
+    @NotEmpty(message = "roles are required.")
     private String roles;
 
     public HogwartsUser() {}
