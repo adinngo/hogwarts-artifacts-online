@@ -93,6 +93,7 @@ public class IntegrationTestArtifact {
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     void testAddArtifactSuccess() throws Exception {
         ArtifactDto artifactDto = new ArtifactDto(null,
                 "Update name", "Update description", "Update images", null);
