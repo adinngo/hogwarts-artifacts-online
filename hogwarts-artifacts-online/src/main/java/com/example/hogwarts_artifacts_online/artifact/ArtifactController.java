@@ -6,6 +6,8 @@ import com.example.hogwarts_artifacts_online.artifact.dto.ArtifactDto;
 import com.example.hogwarts_artifacts_online.system.Result;
 import com.example.hogwarts_artifacts_online.system.StatusCode;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -38,14 +40,13 @@ public class ArtifactController {
     }
 
     @GetMapping
-    public Result findAllArtifact() {
-        var foundArtifactList = this.artifactService.findAll();
+    public Result findAllArtifact(Pageable pageable) {
+           Page<Artifact> artifactPage = this.artifactService.findAll(pageable);
 
-        List<ArtifactDto> foundArtifactDtoList = foundArtifactList.stream()
-                .map(this.artifactToArtifactDtoConverter::convert)
-                .collect(Collectors.toList());
+        Page<ArtifactDto> artifactDtoPage = artifactPage
+                .map(this.artifactToArtifactDtoConverter::convert);
 
-        return new Result(true, StatusCode.SUCCESS, "Find All Success", foundArtifactDtoList);
+        return new Result(true, StatusCode.SUCCESS, "Find All Success", artifactDtoPage);
     }
 
     @PostMapping

@@ -3,6 +3,8 @@ package com.example.hogwarts_artifacts_online.artifact;
 import com.example.hogwarts_artifacts_online.artifact.utils.IdWorker;
 import com.example.hogwarts_artifacts_online.system.exception.ObjectNotFoundException;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,6 +33,10 @@ public class ArtifactService {
         return artifactRepository.findAll();
     }
 
+    public Page<Artifact> findAll(Pageable pageable) {
+        return artifactRepository.findAll(pageable);
+    }
+
     public Artifact save(Artifact newArtifact) {
         newArtifact.setId(idWorker.nextId() + "");
         return this.artifactRepository.save(newArtifact);
@@ -53,4 +59,6 @@ public class ArtifactService {
                 new ObjectNotFoundException("Artifact",artifactId));
         this.artifactRepository.deleteById(artifactId);
     }
+
+
 }

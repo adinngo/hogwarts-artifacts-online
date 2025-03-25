@@ -5,6 +5,7 @@ import com.example.hogwarts_artifacts_online.system.StatusCode;
 import com.example.hogwarts_artifacts_online.system.exception.ObjectNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.antlr.v4.runtime.misc.MultiMap;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,9 +16,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 
 import java.util.ArrayList;
@@ -130,17 +136,24 @@ class ArtifactControllerTest {
     @Test
     void testFindAllArtifactSuccess() throws Exception {
         //given
-        given(artifactService.findAll()).willReturn(this.artifactList);
+        Pageable pageable= PageRequest.of(0, 20);
+        PageImpl<Artifact> artifactPage = new PageImpl<>(this.artifactList, pageable, this.artifactList.size());
+         given(artifactService.findAll(Mockito.any(Pageable.class))).willReturn(artifactPage);
+
+        MultiValueMap<String, String> multiMap = new LinkedMultiValueMap<>();
+        multiMap.add("page", "0");
+        multiMap.add("size", "20");
         //when and then
-        mockMvc.perform(get(this.baseUrl).accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(this.baseUrl).accept(MediaType.APPLICATION_JSON)
+                        .params(multiMap))
                 .andExpect(jsonPath("$.flag").value(true))
                 .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
                 .andExpect(jsonPath("$.message").value("Find All Success"))
-                .andExpect(jsonPath("$.data.size()").value(this.artifactList.size()))
-                .andExpect(jsonPath("$.data[0].id").value("1250808601744904191"))
-                .andExpect(jsonPath("$.data[0].name").value("Deluminator"))
-                .andExpect(jsonPath("$.data[1].id").value("1250808601744904192"))
-                .andExpect(jsonPath("$.data[1].name").value("Invisibility Cloak"));
+                .andExpect(jsonPath("$.data.content.size()").value(this.artifactList.size()))
+                .andExpect(jsonPath("$.data.content[0].id").value("1250808601744904191"))
+                .andExpect(jsonPath("$.data.content[0].name").value("Deluminator"))
+                .andExpect(jsonPath("$.data.content[1].id").value("1250808601744904192"))
+                .andExpect(jsonPath("$.data.content[1].name").value("Invisibility Cloak"));
     }
 
     @Test
