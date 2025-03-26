@@ -9,6 +9,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
@@ -131,13 +134,13 @@ class UserServiceTest {
     }
 
     @Test
-    void testUpdateSuccess() {
-        HogwartsUser u = new HogwartsUser();
-        u.setId(1L);
-        u.setUsername("john");
-        u.setPassword("123456");
-        u.setEnabled(true);
-        u.setRoles("admin user");
+    void testUpdateByAdminSuccess() {
+        HogwartsUser oldUser = new HogwartsUser();
+        oldUser.setId(1L);
+        oldUser.setUsername("john");
+        oldUser.setPassword("123456");
+        oldUser.setEnabled(true);
+        oldUser.setRoles("admin user");
 
         HogwartsUser update = new HogwartsUser();
         update.setId(1L);
@@ -145,15 +148,57 @@ class UserServiceTest {
         update.setEnabled(true);
         update.setRoles("admin user");
 
-        given(this.userRepository.findById(1L)).willReturn(Optional.of(u));
-        given(this.userRepository.save(u)).willReturn(u);
+        given(this.userRepository.findById(2L)).willReturn(Optional.of(oldUser));
+        given(this.userRepository.save(oldUser)).willReturn(oldUser);
 
-        HogwartsUser updatedUser = this.userService.update(1l, update);
+        HogwartsUser hogwartsUser = new HogwartsUser();
+        hogwartsUser.setRoles("admin");
+        MyUserPrincipal myUserPrincipal = new MyUserPrincipal(hogwartsUser);
 
-        assertThat(updatedUser.getUsername()).isEqualTo(u.getUsername());
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(new UsernamePasswordAuthenticationToken(myUserPrincipal, null, myUserPrincipal.getAuthorities()));
+        SecurityContextHolder.setContext(securityContext);
 
-        verify(this.userRepository, times(1)).findById(1L);
-        verify(this.userRepository, times(1)).save(u);
+        HogwartsUser updatedUser = this.userService.update(2l, update);
+
+        assertThat(updatedUser.getUsername()).isEqualTo(oldUser.getUsername());
+
+        verify(this.userRepository, times(1)).findById(2L);
+        verify(this.userRepository, times(1)).save(oldUser);
+    }
+
+    @Test
+    void testUpdateByUserSuccess() {
+        HogwartsUser oldUser = new HogwartsUser();
+        oldUser.setId(2L);
+        oldUser.setUsername("eric");
+        oldUser.setPassword("654321");
+        oldUser.setEnabled(true);
+        oldUser.setRoles("user");
+
+        HogwartsUser update = new HogwartsUser();
+        update.setId(2L);
+        update.setUsername("john-updated");
+        update.setEnabled(true);
+        update.setRoles("user");
+
+        given(this.userRepository.findById(2L)).willReturn(Optional.of(oldUser));
+        given(this.userRepository.save(oldUser)).willReturn(oldUser);
+
+        HogwartsUser hogwartsUser = new HogwartsUser();
+        hogwartsUser.setRoles("user");
+        MyUserPrincipal myUserPrincipal = new MyUserPrincipal(hogwartsUser);
+
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(new UsernamePasswordAuthenticationToken(myUserPrincipal, null, myUserPrincipal.getAuthorities()));
+        SecurityContextHolder.setContext(securityContext);
+
+        HogwartsUser updatedUser = this.userService.update(2l, update);
+
+        assertThat(updatedUser.getUsername()).isEqualTo(oldUser.getUsername());
+
+        verify(this.userRepository, times(1)).findById(2L);
+        verify(this.userRepository, times(1)).save(oldUser);
     }
 
     @Test

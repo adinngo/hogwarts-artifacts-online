@@ -1,6 +1,8 @@
 package com.example.hogwarts_artifacts_online.hogwartsUser;
 
 import com.example.hogwarts_artifacts_online.system.exception.ObjectNotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -37,9 +39,14 @@ public class UserService implements UserDetailsService {
 
     public HogwartsUser update(Long userId, HogwartsUser updated) {
         return this.userRepository.findById(userId).map((user) -> {
-             user.setUsername(updated.getUsername());
-             user.setEnabled(updated.getEnabled());
-             user.setRoles(updated.getRoles());
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if(authentication.getAuthorities().stream().noneMatch(grantedAuthority -> grantedAuthority.getAuthority().contains("admin") )) {
+                user.setUsername(updated.getUsername());
+            } else {
+                user.setUsername(updated.getUsername());
+                user.setRoles(updated.getRoles());
+                user.setEnabled(updated.getEnabled());
+            }
              return this.userRepository.save(user);
         }).orElseThrow(() -> new ObjectNotFoundException("user", userId + ""));
     }
