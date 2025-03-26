@@ -77,6 +77,25 @@ public class IntegrationTestUser {
     }
 
     @Test
+    @DisplayName("Check findUserById (GET): User with ROLE_user Accessing own Info")
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+    void testFindUserByIdWithUserAccessingOwnInfo() throws Exception {
+        ResultActions resultActions = this.mockMvc.perform(post(this.baseUrl + "/users/login")
+                .with(httpBasic("eric", "654321"))); // httpBasic() is from spring-security-test.
+        MvcResult mvcResult = resultActions.andDo(print()).andReturn();
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        JSONObject json = new JSONObject(contentAsString);
+        String ericToken = "Bearer " + json.getJSONObject("data").getString("Token");
+
+        this.mockMvc.perform(get(this.baseUrl + "/users/2").accept(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, this.token))
+                .andExpect(jsonPath("$.flag").value(true))
+                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+                .andExpect(jsonPath("$.message").value("Find One Success"))
+                .andExpect(jsonPath("$.data.id").value(2))
+                .andExpect(jsonPath("$.data.username").value("eric"));
+    }
+
+    @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
     @DisplayName("Check findUserById (GET): User with ROLE_user Accessing Another Users Info")
     void testFindUserByIdWithUserAccessingAnotherUsersInfo() throws Exception {
@@ -233,6 +252,38 @@ public class IntegrationTestUser {
                 .andExpect(jsonPath("$.message").value("No permission."))
                 .andExpect(jsonPath("$.data").value("Access Denied"));
     }
+
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+    @DisplayName("Check updateUser with valid input (PUT): User with ROLE_user Updating own Info")
+    void testUpdateUserWithUserUpdatingrOwnInfo() throws Exception {
+        ResultActions resultActions = this.mockMvc.perform(post(this.baseUrl + "/users/login")
+                .with(httpBasic("eric", "654321"))); // httpBasic() is from spring-security-test.
+
+        MvcResult mvcResult = resultActions.andDo(print()).andReturn();
+        String contentAsString = mvcResult.getResponse().getContentAsString();
+        JSONObject json = new JSONObject(contentAsString);
+        String ericToken = "Bearer " + json.getJSONObject("data").getString("Token");
+
+        HogwartsUser hogwartsUser = new HogwartsUser();
+        hogwartsUser.setUsername("eric-updated"); // Username is changed. It was tom.
+        hogwartsUser.setEnabled(false);
+        hogwartsUser.setRoles("user");
+
+        String hogwartsUserJson = this.objectMapper.writeValueAsString(hogwartsUser);
+
+        this.mockMvc.perform(put(this.baseUrl + "/users/2")
+                        .contentType(MediaType.APPLICATION_JSON).content(hogwartsUserJson)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, ericToken))
+                .andExpect(jsonPath("$.flag").value(true))
+                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+                .andExpect(jsonPath("$.message").value("Update Success"))
+                .andExpect(jsonPath("$.data.username").value("eric-updated"));
+    }
+
+
     @Test
     @DisplayName("Check deleteUser with valid input (DELETE)")
     void testDeleteUserSuccess() throws Exception {
